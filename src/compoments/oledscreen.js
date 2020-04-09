@@ -19,12 +19,10 @@ class OLEDScreen extends React.Component {
     }
 
     render() {
-        const {width,height,dot,options} = this.props;
+        const {width,height,dot} = this.props;
         const {pad} = this.state;
-
         let screenWidth = width * dot + pad * 2 + 1;
         let screenHeight = height * dot + pad * 2 + 1;
-        console.log(options);
         let marginLeft = parseInt(width)+2;
         return ( 
             <div >
@@ -35,21 +33,22 @@ class OLEDScreen extends React.Component {
     
     drawText(text){
         console.log("drawText",text);
-        text = "\ue630";
-        const {width,height} = this.props;
+        const {width,height,options} = this.props;
+        const {fontsize,font,simpleValue} = options;
         this.textctx.clearRect(0,0,width,height);
         this.buffer = this.buffer.map( () => 0 );
         if(!text)
             return;
 
-        this.textctx.font='14px iconfont_oled';
+        this.textctx.font=`${fontsize}px ${font}`;
         this.textctx.fillStyle = '#000';
         let textMetrics = this.textctx.measureText(text);
-        console.log(textMetrics);
+        console.log('textMetrics',textMetrics);
         let textWidth = textMetrics.width;
         let textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
         this.textctx.fillText(text, 0, textHeight);
-        let imageData = this.textctx.getImageData(0,0,textWidth,textHeight);
+        
+        let imageData = this.textctx.getImageData(0,textMetrics.actualBoundingBoxDescent,textWidth,textHeight);
         textWidth = imageData.width;
         textHeight = imageData.height;
         let x = 0, y = 0;
@@ -59,7 +58,7 @@ class OLEDScreen extends React.Component {
             let g = imageData.data[i + 1];
             let b = imageData.data[i + 2];
             let a = imageData.data[i + 3];
-            let pixel = (r+g+b+a <=170 ) ? 0:1;
+            let pixel = (r+g+b+a <= simpleValue ) ? 0:1;
             let pos = x * width + y;
             this.buffer.splice(pos,1,pixel);
             y += 1;
@@ -147,8 +146,7 @@ class OLEDScreen extends React.Component {
         this.textctx = this.textCanvas.current.getContext("2d");
         if(options)
             this.drawText(options.text);
-        
-        //this.drawChars();
+
         this.drawScreen();
     }
 }
