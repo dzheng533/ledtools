@@ -1,3 +1,9 @@
+.main{
+  width: 1024px;
+  margin-left: calc(50% - 512px);
+  border: 1px dashed #61dafb;
+  margin-top: 10px;
+}
 .App {
   text-align: center;
 }
